@@ -836,14 +836,10 @@ if('serviceWorker' in navigator){
 }
 
 // ── 초기화 ───────────────────────────────────────────────────
-const savedKey = localStorage.getItem('fb_api_key');
-const savedUrl = localStorage.getItem('fb_db_url');
-if(savedKey && savedUrl && initFirebase(savedKey, savedUrl)){
-  loadChipsAndShowLogin();
-} else {
-  showScreen('screen-setup');
-}
-
+const API_KEY = "AIzaSyA2bH4MIo9BFP_lmdoYuV4NyG2m1eMAEpA";
+const DB_URL  = "https://armdri-checklist-default-rtdb.firebaseio.com";
+initFirebase(API_KEY, DB_URL);
+loadChipsAndShowLogin();
 </script>
 </body>
 </html>
