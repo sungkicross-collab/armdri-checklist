@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="영성습관"/>
+  <meta name="theme-color" content="#4a7c5e"/>
+  <title>영성습관 체크리스트 · 아름드리교회</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="apple-touch-icon" href="icon-192.png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --green: #4a7c5e;
+      --green2: #7db89a;
+      --green-bg: #eaf5ef;
+      --gold: #c0a060;
+      --gold2: #e8c97a;
+      --bg: #f7f6f1;
+      --card: #ffffff;
+      --border: #e8e3d5;
+      --text: #1a1a1a;
+      --sub: #888;
+      --red: #c0392b;
+      --blue: #2471a3;
+      --notice-bg: #fffbea;
+      --notice-br: #e8d98a;
+      --radius: 14px;
+      --shadow: 0 2px 14px rgba(0,0,0,0.07);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--bg); font-family: 'Noto Serif KR', Georgia, serif; -webkit-tap-highlight-color: transparent; }
+
+    /* ── SCREENS ───────────────────────────── */
+    .screen { display: none; min-height: 100vh; }
+    .screen.active { display: block; }
+    .screen-flex { display: none; min-height: 100vh; align-items: center; justify-content: center; background: linear-gradient(145deg, #e4dfd2 0%, #cdc8b8 100%); }
+    .screen-flex.active { display: flex; }
+
+    /* ── LOGIN CARD ────────────────────────── */
+    .login-card {
+      background: var(--card);
+      border-radius: 22px;
+      padding: 48px 40px 40px;
+      box-shadow: 0 12px 48px rgba(0,0,0,0.13);
+      text-align: center;
+      width: min(92%, 400px);
+      animation: slideUp 0.35s cubic-bezier(.4,0,.2,1);
+    }
+    @keyframes slideUp { from { opacity:0; transform:translateY(18px);} to { opacity:1; transform:translateY(0);} }
+    .login-icon { font-size: 44px; line-height: 1; margin-bottom: 10px; }
+    .login-title { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 4px; }
+    .login-subtitle { font-size: 13px; color: var(--sub); margin-bottom: 28px; }
+    .form-col { display: flex; flex-direction: column; gap: 11px; }
+    .inp {
+      padding: 13px 16px; border-radius: 11px; border: 2px solid var(--border);
+      font-size: 16px; font-family: inherit; text-align: center; outline: none;
+      transition: border-color 0.2s; background: #fafaf8;
+    }
+    .inp:focus { border-color: var(--green); }
+    .btn { display: block; width: 100%; padding: 13px; border-radius: 11px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; transition: transform 0.1s, opacity 0.15s; }
+    .btn:active { transform: scale(0.97); }
+    .btn-green { background: var(--green); color: #fff; }
+    .btn-slate { background: #5a6270; color: #fff; }
+    .btn-red   { background: var(--red); color: #fff; }
+    .btn-ghost { background: #f0ede6; color: #555; }
+    .err-msg   { color: var(--red); font-size: 13px; text-align: center; }
+    .chips-wrap { margin-top: 22px; }
+    .chips-label { font-size: 11px; color: #bbb; margin-bottom: 9px; letter-spacing: 0.5px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+    .chip { padding: 5px 14px; border-radius: 20px; background: #f0ede6; border: 1px solid var(--border); font-size: 13px; cursor: pointer; font-family: inherit; transition: background 0.15s; }
+    .chip:hover { background: #e4e0d4; }
+
+    /* ── APP HEADER ────────────────────────── */
+    .app-header {
+      background: var(--card);
+      border-bottom: 2px solid var(--border);
+      padding: 13px 18px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 200;
+    }
+    .hd-left  { display: flex; align-items: center; gap: 11px; }
+    .hd-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .hd-cross { font-size: 26px; color: var(--green); }
+    .hd-title { font-size: 18px; font-weight: 900; color: var(--text); letter-spacing: -0.4px; }
+    .hd-church{ font-size: 11px; color: var(--sub); margin-top: 1px; }
+    .ym-row   { display: flex; align-items: center; gap: 4px; }
+    .sel {
+      padding: 4px 7px; border-radius: 7px; border: 1px solid var(--border);
+      font-size: 13px; background: #fafaf8; font-family: inherit; cursor: pointer;
+    }
+    .sel-lbl  { font-size: 12px; color: #666; }
+    .action-row { display: flex; gap: 6px; align-items: center; }
+    .badge {
+      display: flex; align-items: center; gap: 5px;
+      background: #f0ede6; border-radius: 20px; padding: 4px 11px;
+    }
+    .badge-name { font-size: 13px; font-weight: 700; color: #333; }
+    .btn-sm { background: none; border: none; color: var(--green); font-size: 12px; cursor: pointer; font-family: inherit; padding: 2px 0; }
+    .btn-icon {
+      padding: 6px 12px; border-radius: 9px; border: none;
+      font-size: 12px; font-weight: 700; cursor: pointer; font-family: inherit; color: #fff;
+      transition: opacity 0.15s;
+    }
+    .btn-icon:hover { opacity: 0.85; }
+
+    /* ── PROGRESS ──────────────────────────── */
+    .prog-wrap { background: var(--card); border-bottom: 1px solid var(--border); padding: 13px 18px; }
+    .prog-row  { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; font-size: 13px; }
+    .prog-lbl  { font-weight: 700; color: #555; }
+    .prog-bar  { height: 10px; background: #e4dfd2; border-radius: 10px; overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 10px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+    .gift-msg  { margin-top: 7px; font-size: 12px; color: var(--gold); font-weight: 700; }
+
+    /* ── CALENDAR ──────────────────────────── */
+    .cal-wrap { overflow-x: auto; padding: 14px 10px 0; }
+    .cal-table {
+      width: 100%; border-collapse: collapse; min-width: 560px;
+      background: var(--card); border-radius: 13px; overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    .cal-th {
+      padding: 9px 3px; text-align: center;
+      background: #f2efe8; border-bottom: 2px solid #ddd9ce;
+      font-weight: 900; font-size: 11px;
+    }
+    .day-en { display: block; font-size: 9px; letter-spacing: 0.8px; opacity: 0.75; }
+    .day-ko { display: block; font-size: 15px; }
+    .cal-td {
+      vertical-align: top; padding: 5px 4px;
+      border: 1px solid #ece8df; min-width: 76px;
+    }
+    .td-empty { background: #e4e0d4 !important; opacity: 0.28; pointer-events: none; }
+    .td-today { background: #e6f3eb !important; }
+    .td-even  { background: #fafaf8; }
+    .td-odd   { background: #f4f2ec; }
+
+    .date-wrap { display: flex; justify-content: flex-end; margin-bottom: 3px; }
+    .date-bubble {
+      width: 21px; height: 21px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+    }
+    .date-today-b { background: var(--green); color: #fff; font-weight: 900; }
+    .date-sun { color: var(--red); font-weight: 700; }
+    .date-sat { color: var(--blue); font-weight: 700; }
+    .date-norm{ color: #666; }
+
+    .item-list { display: flex; flex-direction: column; gap: 4px; }
+    .check-row { display: flex; align-items: center; gap: 4px; cursor: pointer; user-select: none; }
+    .chk-box {
+      width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0;
+      border: 1.5px solid #c0bbb0; background: transparent;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.14s;
+    }
+    .chk-box.on { background: var(--green); border-color: var(--green); }
+    .chk-mark { color: #fff; font-size: 9px; font-weight: 900; display: none; }
+    .chk-box.on .chk-mark { display: block; }
+    .chk-txt { font-size: 9.5px; line-height: 1.4; color: #666; transition: all 0.14s; }
+    .chk-txt.on { color: var(--green); text-decoration: line-through; }
+
+    /* ── NOTICE ────────────────────────────── */
+    .notice {
+      margin: 14px 10px 30px;
+      background: var(--notice-bg); border: 1px solid var(--notice-br);
+      border-radius: 11px; padding: 13px 15px; font-size: 11px; color: #666; line-height: 1.85;
+    }
+    .notice p + p { margin-top: 3px; }
+
+    /* ── ADMIN ─────────────────────────────── */
+    .sum-row { display: flex; gap: 11px; padding: 16px 16px; flex-wrap: wrap; }
+    .sum-card {
+      flex: 1; min-width: 90px; background: var(--card); border-radius: var(--radius);
+      padding: 16px 14px; box-shadow: var(--shadow); text-align: center;
+    }
+    .sum-card.accent { background: linear-gradient(135deg, var(--green), var(--green2)); }
+    .sum-num  { font-size: 30px; font-weight: 900; color: var(--text); }
+    .sum-lbl  { font-size: 11px; color: var(--sub); margin-top: 3px; }
+    .sum-card.accent .sum-num { color: #fff; }
+    .sum-card.accent .sum-lbl { color: #c8eedd; }
+    .admin-tbl-wrap { overflow-x: auto; padding: 0 12px 28px; }
+    .admin-tbl {
+      width: 100%; border-collapse: collapse; min-width: 360px;
+      background: var(--card); border-radius: 13px; overflow: hidden; box-shadow: var(--shadow);
+    }
+    .admin-tbl th { padding: 9px 11px; text-align: left; background: #f2efe8; border-bottom: 2px solid #ddd9ce; font-weight: 800; font-size: 12px; color: #444; }
+    .admin-tbl td { padding: 9px 11px; font-size: 12px; color: #333; border-bottom: 1px solid var(--border); }
+    .admin-tbl tr:last-child td { border-bottom: none; }
+    .admin-tbl tr:nth-child(even) td { background: #f7f5f0; }
+    .badge-green { background: var(--green-bg); color: var(--green); border-radius: 20px; padding: 2px 9px; font-weight: 700; font-size: 11px; }
+    .badge-gray  { background: #f0ede6; color: #999; border-radius: 20px; padding: 2px 9px; font-size: 11px; }
+    .mini-bar { height: 7px; background: #e4dfd2; border-radius: 7px; overflow: hidden; min-width: 56px; }
+    .mini-fill { height: 100%; border-radius: 7px; transition: width 0.4s; }
+    .fill-g { background: linear-gradient(90deg, var(--green), var(--green2)); }
+    .fill-gold { background: linear-gradient(90deg, #c8a84b, var(--gold2)); }
+    .empty-state { padding: 52px 20px; text-align: center; color: #bbb; }
+    .empty-state .ico { font-size: 38px; margin-bottom: 10px; }
+    .refresh-btn {
+      display: flex; align-items: center; gap: 6px; margin: 0 auto 16px;
+      padding: 8px 18px; border-radius: 10px; border: none;
+      background: var(--green); color: #fff; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit;
+    }
+
+    /* ── SHARE MODAL ───────────────────────── */
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.52);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 9000; padding: 16px;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .modal-card {
+      background: var(--card); border-radius: 22px; padding: 32px 28px;
+      width: min(92%, 380px); box-shadow: 0 20px 70px rgba(0,0,0,0.22);
+      text-align: center; font-family: inherit;
+      animation: slideUp 0.28s cubic-bezier(.4,0,.2,1);
+    }
+    .modal-title { font-size: 19px; font-weight: 900; margin: 10px 0 4px; }
+    .modal-sub   { font-size: 13px; color: var(--sub); margin-bottom: 20px; }
+    .qr-box {
+      background: #f7f6f1; border-radius: 13px; padding: 16px;
+      margin-bottom: 18px;
+    }
+    .qr-label { font-size: 11px; color: var(--sub); margin-bottom: 10px; font-weight: 700; letter-spacing: 0.4px; }
+    .qr-img-wrap {
+      display: flex; justify-content: center; align-items: center;
+      min-height: 200px;
+    }
+    .qr-img { width: 190px; height: 190px; border-radius: 10px; }
+    .qr-loading { color: #ccc; font-size: 13px; }
+    .qr-hint { font-size: 10px; color: #bbb; margin-top: 9px; }
+    .link-row {
+      display: flex; align-items: center; gap: 8px;
+      background: #f2efe8; border-radius: 10px; padding: 9px 12px;
+      margin-bottom: 16px;
+    }
+    .link-txt { flex: 1; font-size: 11px; color: #666; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+    .copy-btn {
+      flex-shrink: 0; padding: 6px 14px; border-radius: 8px;
+      border: none; font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: inherit; transition: background 0.2s;
+    }
+    .copy-default { background: #2c2c2c; color: #fff; }
+    .copy-done    { background: var(--green); color: #fff; }
+    .modal-hint   { font-size: 11px; color: #bbb; line-height: 1.7; margin-bottom: 18px; }
+
+    /* ── TOAST ─────────────────────────────── */
+    #toast {
+      position: fixed; top: 18px; left: 50%; transform: translateX(-50%);
+      background: linear-gradient(135deg, var(--gold), var(--gold2));
+      color: #fff; padding: 12px 24px; border-radius: 50px;
+      font-weight: 700; font-size: 14px;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.18);
+      z-index: 9999; white-space: nowrap; display: none;
+      animation: slideDown 0.3s ease;
+    }
+    @keyframes slideDown { from{opacity:0;transform:translateX(-50%) translateY(-12px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+
+    /* ── LOADING ───────────────────────────── */
+    .loading { padding: 44px; text-align: center; color: var(--sub); font-size: 14px; }
+    .spin { display: inline-block; animation: spin 0.9s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── FIREBASE SETUP SCREEN ─────────────── */
+    .setup-wrap { padding: 24px 20px; max-width: 500px; margin: 0 auto; }
+    .setup-wrap h2 { font-size: 20px; font-weight: 900; margin-bottom: 6px; color: var(--text); }
+    .setup-wrap p  { font-size: 13px; color: var(--sub); line-height: 1.7; margin-bottom: 16px; }
+    .step-box { background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; box-shadow: var(--shadow); }
+    .step-num { display: inline-flex; width: 24px; height: 24px; border-radius: 50%; background: var(--green); color: #fff; font-size: 12px; font-weight: 900; align-items: center; justify-content: center; margin-right: 8px; vertical-align: middle; }
+    .step-title { font-size: 14px; font-weight: 800; color: var(--text); }
+    .step-desc { font-size: 12px; color: #777; margin-top: 6px; line-height: 1.65; }
+    .step-link { color: var(--green); font-weight: 700; word-break: break-all; }
+    .cfg-inp { width: 100%; padding: 10px 14px; border-radius: 9px; border: 1.5px solid var(--border); font-size: 13px; font-family: inherit; outline: none; margin-top: 8px; background: #fafaf8; }
+    .cfg-inp:focus { border-color: var(--green); }
+    .setup-btn { margin-top: 14px; width: 100%; padding: 13px; border-radius: 11px; background: var(--green); color: #fff; border: none; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .setup-err { color: var(--red); font-size: 12px; margin-top: 8px; }
+    code { background: #f0ede6; border-radius: 5px; padding: 2px 6px; font-size: 11px; font-family: monospace; }
+
+    @media (max-width: 480px) {
+      .login-card { padding: 36px 22px 28px; }
+      .app-header { padding: 11px 13px; }
+      .hd-title { font-size: 16px; }
+      .sum-num { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ① Firebase 설정 화면 -->
+<div id="screen-setup" class="screen active">
+  <div class="setup-wrap">
+    <div style="text-align:center;padding:20px 0 16px">
+      <span style="font-size:40px">✝</span>
+      <h2 style="margin-top:8px">Firebase 설정</h2>
+      <p>학생들과 데이터를 공유하려면<br>Firebase 무료 계정이 필요합니다.<br>아래 단계를 따라 설정해 주세요.</p>
+    </div>
+
+    <div class="step-box">
+      <span class="step-num">1</span><span class="step-title">Firebase 프로젝트 만들기</span>
+      <p class="step-desc">
+        <a class="step-link" href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> 접속<br>
+        → "프로젝트 추가" → 프로젝트 이름 입력 (예: <code>armdri-checklist</code>)<br>
+        → Google 애널리틱스 사용 안 함 → 프로젝트 만들기
+      </p>
+    </div>
+
+    <div class="step-box">
+      <span class="step-num">2</span><span class="step-title">Realtime Database 활성화</span>
+      <p class="step-desc">
+        왼쪽 메뉴 → "빌드" → "Realtime Database" → "데이터베이스 만들기"<br>
+        → 위치: <code>asia-southeast1</code> 선택 → <b>테스트 모드</b>로 시작<br>
+        → 생성 후 나타나는 URL 복사 (예: <code>https://xxx-default-rtdb.asia-southeast1.firebasedatabase.app</code>)
+      </p>
+    </div>
+
+    <div class="step-box">
+      <span class="step-num">3</span><span class="step-title">웹 앱 등록 후 API 키 복사</span>
+      <p class="step-desc">
+        프로젝트 홈 → "앱 추가" → 웹(<code>&lt;/&gt;</code>) 선택<br>
+        → 앱 닉네임 입력 → 등록<br>
+        → <code>firebaseConfig</code> 에서 <b>apiKey</b>와 <b>databaseURL</b> 복사
+      </p>
+    </div>
+
+    <div class="step-box" style="border: 2px solid var(--green)">
+      <span class="step-num">4</span><span class="step-title">아래에 입력하기</span>
+      <input id="cfg-api-key" class="cfg-inp" placeholder="apiKey (예: AIzaSy...)" />
+      <input id="cfg-db-url" class="cfg-inp" placeholder="databaseURL (예: https://xxx.firebasedatabase.app)" style="margin-top:8px"/>
+      <p id="setup-err" class="setup-err" style="display:none"></p>
+      <button class="setup-btn" onclick="saveConfig()">저장하고 시작하기</button>
+    </div>
+
+    <p style="font-size:11px;color:#bbb;text-align:center;margin-top:8px;line-height:1.7">
+      설정값은 이 기기에만 저장됩니다.<br>관리자 기기와 학생 기기 모두에서 동일하게 설정해 주세요.
+    </p>
+  </div>
+</div>
+
+<!-- ② 사용자 로그인 -->
+<div id="screen-login" class="screen-flex">
+  <div class="login-card">
+    <div class="login-icon">✝</div>
+    <h1 class="login-title">영성습관 체크리스트</h1>
+    <p class="login-subtitle">아름드리교회 중고등부</p>
+    <div class="form-col">
+      <input id="name-inp" class="inp" type="text" placeholder="이름을 입력하세요" autocomplete="off"/>
+      <button class="btn btn-green" onclick="doLogin()">시작하기</button>
+      <button class="btn btn-slate" onclick="showAdminLogin()">🔐 관리자 로그인</button>
+    </div>
+    <div id="chips-wrap" class="chips-wrap" style="display:none">
+      <p class="chips-label">최근 참여자</p>
+      <div id="chips" class="chips"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 관리자 로그인 -->
+<div id="screen-admin-login" class="screen-flex">
+  <div class="login-card">
+    <div class="login-icon">🔐</div>
+    <h1 class="login-title">관리자 로그인</h1>
+    <p class="login-subtitle">아름드리교회 중고등부</p>
+    <div class="form-col">
+      <input id="pw-inp" class="inp" type="password" placeholder="비밀번호 입력"/>
+      <p id="pw-err" class="err-msg" style="display:none">비밀번호가 틀렸습니다.</p>
+      <button class="btn btn-green" onclick="doAdminLogin()">로그인</button>
+      <button class="btn btn-ghost" onclick="showLogin()">← 돌아가기</button>
+    </div>
+  </div>
+</div>
+
+<!-- ④ 사용자 체크리스트 -->
+<div id="screen-user" class="screen">
+  <header class="app-header">
+    <div class="hd-left">
+      <span class="hd-cross">✝</span>
+      <div>
+        <div class="hd-title">영성습관 check list</div>
+        <div class="hd-church">아름드리교회 중고등부</div>
+      </div>
+    </div>
+    <div class="hd-right">
+      <div class="ym-row">
+        <select id="sel-year" class="sel" onchange="changeYearMonth()"></select>
+        <span class="sel-lbl">년</span>
+        <select id="sel-month" class="sel" onchange="changeYearMonth()"></select>
+        <span class="sel-lbl">월</span>
+      </div>
+      <div class="action-row">
+        <button class="btn-icon" style="background:#2c7bb5" onclick="openShare()">📲 공유</button>
+        <div class="badge">
+          <span>👤</span>
+          <span id="disp-name" class="badge-name"></span>
+          <button class="btn-sm" onclick="doLogout()">변경</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="prog-wrap">
+    <div class="prog-row">
+      <span class="prog-lbl">이번 달 체크 현황</span>
+      <span id="prog-text"></span>
+    </div>
+    <div class="prog-bar"><div id="prog-fill" class="prog-fill" style="width:0%"></div></div>
+    <p id="gift-msg" class="gift-msg" style="display:none">🎁 선물 조건 달성! 담당 선생님께 보고해 보세요.</p>
+  </div>
+
+  <div id="cal-loading" class="loading"><span class="spin">⏳</span> 불러오는 중...</div>
+  <div id="cal-wrap" class="cal-wrap" style="display:none">
+    <table class="cal-table">
+      <thead id="cal-head"></thead>
+      <tbody id="cal-body"></tbody>
+    </table>
+  </div>
+
+  <div class="notice">
+    <p>• 2달에 한번 영성 습관 시상이 있습니다. 시상 기준은 <b>50개 이상</b> 체크 할 경우 선물을 드립니다. 꼭 한번 보전해보세요.</p>
+    <p>• 시편 기도와 필사 본문은 중고등부 밴드에 공지합니다. 말씀 듣기는 등록표와 카톡 단체방을 참고해주세요. 필사는 주 중 시편 기도 말씀을 2일자 이상 필사할 때 체크 인정합니다.</p>
+  </div>
+  <div style="height:60px"></div>
+</div>
+
+<!-- ⑤ 관리자 대시보드 -->
+<div id="screen-admin" class="screen">
+  <header class="app-header">
+    <div class="hd-left">
+      <span class="hd-cross">✝</span>
+      <div>
+        <div class="hd-title">관리자 대시보드</div>
+        <div class="hd-church">아름드리교회 중고등부</div>
+      </div>
+    </div>
+    <div class="hd-right">
+      <div class="ym-row">
+        <select id="admin-year" class="sel" onchange="loadAdminData()"></select>
+        <span class="sel-lbl">년</span>
+        <select id="admin-month" class="sel" onchange="loadAdminData()"></select>
+        <span class="sel-lbl">월</span>
+      </div>
+      <div class="action-row">
+        <button class="btn-icon" style="background:#2c7bb5" onclick="openShare()">📲 공유</button>
+        <button class="btn-icon" style="background:var(--green)" onclick="loadAdminData()">🔄</button>
+        <button class="btn-icon" style="background:var(--red)" onclick="doAdminLogout()">로그아웃</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="sum-row">
+    <div class="sum-card">
+      <div class="sum-num" id="adm-total">-</div>
+      <div class="sum-lbl">전체 참여 인원</div>
+    </div>
+    <div class="sum-card accent">
+      <div class="sum-num" id="adm-achieved">-</div>
+      <div class="sum-lbl">🎁 선물 달성자 (50개↑)</div>
+    </div>
+    <div class="sum-card">
+      <div class="sum-num" id="adm-avg">-</div>
+      <div class="sum-lbl">평균 체크 개수</div>
+    </div>
+  </div>
+
+  <div id="adm-loading" class="loading" style="display:none"><span class="spin">⏳</span> 불러오는 중...</div>
+  <div id="adm-empty" class="empty-state" style="display:none">
+    <div class="ico">📋</div><p>이 달에 체크한 학생이 없습니다.</p>
+  </div>
+  <div id="adm-tbl-wrap" class="admin-tbl-wrap" style="display:none">
+    <table class="admin-tbl">
+      <thead><tr><th>순위</th><th>이름</th><th>체크 수</th><th>달성 여부</th><th>진행률</th></tr></thead>
+      <tbody id="adm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- 공유 모달 -->
+<div id="share-modal" class="modal-backdrop" style="display:none" onclick="closeShareOutside(event)">
+  <div class="modal-card">
+    <div style="font-size:34px">📲</div>
+    <h2 class="modal-title">공유하기</h2>
+    <p class="modal-sub">학생들에게 QR코드 또는 링크를 공유하세요</p>
+    <div class="qr-box">
+      <p class="qr-label">📱 QR코드 스캔</p>
+      <div class="qr-img-wrap">
+        <span id="qr-loading" class="qr-loading">생성 중...</span>
+        <img id="qr-img" class="qr-img" style="display:none" alt="QR Code" onload="qrLoaded()" onerror="qrError()"/>
+      </div>
+      <p class="qr-hint">카메라로 스캔하면 바로 접속됩니다</p>
+    </div>
+    <div class="link-row">
+      <span id="share-url" class="link-txt"></span>
+      <button id="copy-btn" class="copy-btn copy-default" onclick="copyLink()">복사</button>
+    </div>
+    <p class="modal-hint">이 링크로 접속하면 계정 없이<br>바로 체크리스트를 사용할 수 있어요</p>
+    <button class="btn btn-green" onclick="closeShare()">닫기</button>
+  </div>
+</div>
+
+<!-- 축하 토스트 -->
+<div id="toast">🎉 축하합니다! 50개 달성! 선물을 받으세요! 🎁</div>
+
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+// ── 설정 ──────────────────────────────────────────────────────
+const ADMIN_PW   = "1234"; // ← 원하시는 비밀번호로 변경
+const THRESHOLD  = 50;
+const DAYS_EN    = ["SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"];
+const DAYS_KO    = ["일","월","화","수","목","금","토"];
+const WEEKS      = 5;
+const YEARS      = [2025,2026,2027];
+
+let db = null, currentUser = "", curYear = new Date().getFullYear(), curMonth = new Date().getMonth()+1, checks = {}, prevCount = 0;
+
+// ── Firebase 초기화 ───────────────────────────────────────────
+function initFirebase(apiKey, dbUrl) {
+  try {
+    const app = initializeApp({ apiKey, databaseURL: dbUrl, projectId: "checklist-app" });
+    db = getDatabase(app);
+    return true;
+  } catch(e) { return false; }
+}
+
+function dbKey(name, y, m) { return `checks/${name.replace(/[.#$/\[\]]/g,'_')}/${y}_${m}`; }
+
+async function fbGet(name, y, m) {
+  try {
+    const snap = await get(child(ref(db), dbKey(name,y,m)));
+    return snap.exists() ? snap.val() : {};
+  } catch { return {}; }
+}
+
+async function fbSet(name, y, m, data) {
+  try { await set(ref(db, dbKey(name,y,m)), data); } catch {}
+}
+
+async function fbGetAllForMonth(y, m) {
+  try {
+    const snap = await get(ref(db, "checks"));
+    if (!snap.exists()) return [];
+    const rows = [];
+    snap.forEach(userSnap => {
+      const name = userSnap.key.replace(/_/g,' ');
+      const monthKey = `${y}_${m}`;
+      const data = userSnap.child(monthKey).val() || {};
+      const count = Object.values(data).filter(Boolean).length;
+      if(count > 0) rows.push({ name, count, achieved: count >= THRESHOLD });
+    });
+    return rows.sort((a,b) => b.count - a.count);
+  } catch { return []; }
+}
+
+async function fbGetAllUsers() {
+  try {
+    const snap = await get(ref(db, "checks"));
+    if (!snap.exists()) return [];
+    const names = [];
+    snap.forEach(s => names.push(s.key.replace(/_/g,' ')));
+    return names;
+  } catch { return []; }
+}
+
+// ── 화면 전환 ─────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen,.screen-flex').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+window.showLogin = () => showScreen('screen-login');
+window.showAdminLogin = () => showScreen('screen-admin-login');
+
+// ── 셀렉트 채우기 ─────────────────────────────────────────────
+function fillSelects(yearId, monthId, y, m) {
+  const ys = document.getElementById(yearId);
+  const ms = document.getElementById(monthId);
+  ys.innerHTML = YEARS.map(v=>`<option ${v===y?'selected':''}>${v}</option>`).join('');
+  ms.innerHTML = Array.from({length:12},(_,i)=>i+1).map(v=>`<option ${v===m?'selected':''}>${v}</option>`).join('');
+}
+
+// ── 설정 저장 ─────────────────────────────────────────────────
+window.saveConfig = () => {
+  const key = document.getElementById('cfg-api-key').value.trim();
+  const url = document.getElementById('cfg-db-url').value.trim();
+  const err = document.getElementById('setup-err');
+  if (!key || !url) { err.textContent="두 값 모두 입력해 주세요."; err.style.display='block'; return; }
+  if (!url.startsWith('https://')) { err.textContent="databaseURL은 https://로 시작해야 합니다."; err.style.display='block'; return; }
+  if (!initFirebase(key, url)) { err.textContent="설정값이 올바르지 않습니다."; err.style.display='block'; return; }
+  localStorage.setItem('fb_api_key', key);
+  localStorage.setItem('fb_db_url', url);
+  err.style.display='none';
+  loadChipsAndShowLogin();
+};
+
+// ── 로그인 ────────────────────────────────────────────────────
+async function loadChipsAndShowLogin() {
+  showScreen('screen-login');
+  fillSelects('sel-year','sel-month', curYear, curMonth);
+  const users = await fbGetAllUsers();
+  const wrap = document.getElementById('chips-wrap');
+  const chips = document.getElementById('chips');
+  if (users.length > 0) {
+    wrap.style.display='block';
+    chips.innerHTML = users.slice(0,8).map(u=>
+      `<button class="chip" onclick="quickLogin('${u}')">${u}</button>`
+    ).join('');
+  } else { wrap.style.display='none'; }
+}
+
+window.doLogin = () => {
+  const n = document.getElementById('name-inp').value.trim();
+  if (!n) return;
+  currentUser = n;
+  document.getElementById('disp-name').textContent = n;
+  prevCount = 0;
+  loadCalendar();
+  showScreen('screen-user');
+};
+
+window.quickLogin = (name) => {
+  document.getElementById('name-inp').value = name;
+  window.doLogin();
+};
+
+window.doLogout = () => {
+  currentUser=''; checks={};
+  document.getElementById('name-inp').value='';
+  loadChipsAndShowLogin();
+};
+
+document.getElementById('name-inp').addEventListener('keydown', e => { if(e.key==='Enter') window.doLogin(); });
+
+window.doAdminLogin = () => {
+  const pw = document.getElementById('pw-inp').value;
+  const err = document.getElementById('pw-err');
+  if (pw === ADMIN_PW) {
+    err.style.display='none';
+    fillSelects('admin-year','admin-month', curYear, curMonth);
+    loadAdminData();
+    showScreen('screen-admin');
+  } else { err.style.display='block'; }
+};
+
+document.getElementById('pw-inp').addEventListener('keydown', e => { if(e.key==='Enter') window.doAdminLogin(); });
+
+window.doAdminLogout = () => { document.getElementById('pw-inp').value=''; showScreen('screen-login'); };
+
+// ── 달력 계산 ─────────────────────────────────────────────────
+function getFirstDay(y,m) { return new Date(y,m-1,1).getDay(); }
+function getDays(y,m) { return new Date(y,m,0).getDate(); }
+function calcDate(y,m,week,day) {
+  const d = week*7+day-getFirstDay(y,m)+1;
+  const t = getDays(y,m);
+  return d<1||d>t ? null : d;
+}
+function getItems(day) {
+  return day===0 ? ["시편 기도","말씀 듣기","필사"] : ["시편 기도","말씀 듣기","개인기도(5분)"];
+}
+
+// ── 달력 렌더 ─────────────────────────────────────────────────
+async function loadCalendar() {
+  document.getElementById('cal-loading').style.display='block';
+  document.getElementById('cal-wrap').style.display='none';
+  checks = await fbGet(currentUser, curYear, curMonth);
+  prevCount = Object.values(checks).filter(Boolean).length;
+  renderCalendar();
+  document.getElementById('cal-loading').style.display='none';
+  document.getElementById('cal-wrap').style.display='block';
+  updateProgress();
+}
+
+function renderCalendar() {
+  const y=curYear, m=curMonth, now=new Date();
+  const head=document.getElementById('cal-head');
+  head.innerHTML='<tr>'+DAYS_EN.map((d,i)=>{
+    const c=i===0?'var(--red)':i===6?'var(--blue)':'#444';
+    return `<th class="cal-th" style="color:${c}"><span class="day-en">${d}</span><span class="day-ko">${DAYS_KO[i]}</span></th>`;
+  }).join('')+'</tr>';
+
+  const body=document.getElementById('cal-body');
+  let html='';
+  for(let w=0;w<WEEKS;w++){
+    html+='<tr>';
+    for(let d=0;d<7;d++){
+      const date=calcDate(y,m,w,d);
+      if(!date){ html+='<td class="cal-td td-empty"></td>'; continue; }
+      const isToday=now.getFullYear()===y&&now.getMonth()+1===m&&now.getDate()===date;
+      const tdCls=isToday?'td-today':w%2===0?'td-even':'td-odd';
+      const bCls=isToday?'date-today-b':d===0?'date-sun':d===6?'date-sat':'date-norm';
+      const items=getItems(d);
+      const iHtml=items.map((item,idx)=>{
+        const key=`${w}-${d}-${idx}`;
+        const on=!!checks[key];
+        return `<label class="check-row" onclick="toggle('${w}','${d}','${idx}')">
+          <span class="chk-box${on?' on':''}"><span class="chk-mark">✓</span></span>
+          <span class="chk-txt${on?' on':''}">${item}</span>
+        </label>`;
+      }).join('');
+      html+=`<td class="cal-td ${tdCls}">
+        <div class="date-wrap"><span class="date-bubble ${bCls}">${date}</span></div>
+        <div class="item-list">${iHtml}</div>
+      </td>`;
+    }
+    html+='</tr>';
+  }
+  body.innerHTML=html;
+}
+
+window.toggle = (w,d,idx) => {
+  const key=`${w}-${d}-${idx}`;
+  checks[key]=!checks[key];
+  const cnt=Object.values(checks).filter(Boolean).length;
+  if(cnt>=THRESHOLD&&prevCount<THRESHOLD) showToast();
+  prevCount=cnt;
+  fbSet(currentUser,curYear,curMonth,checks);
+
+  // 해당 행만 갱신
+  const rows=document.getElementById('cal-body').querySelectorAll('tr');
+  const td=rows[parseInt(w)]?.querySelectorAll('td')[parseInt(d)];
+  if(td){
+    const crow=td.querySelectorAll('.check-row')[parseInt(idx)];
+    if(crow){
+      crow.querySelector('.chk-box').classList.toggle('on',!!checks[key]);
+      crow.querySelector('.chk-txt').classList.toggle('on',!!checks[key]);
+    }
+  }
+  updateProgress();
+};
+
+function updateProgress() {
+  const cnt=Object.values(checks).filter(Boolean).length;
+  const pct=Math.min(cnt/THRESHOLD*100,100);
+  const fill=document.getElementById('prog-fill');
+  fill.style.width=pct+'%';
+  fill.style.background=cnt>=THRESHOLD
+    ?'linear-gradient(90deg,var(--gold),var(--gold2))'
+    :'linear-gradient(90deg,var(--green),var(--green2))';
+  document.getElementById('prog-text').innerHTML=
+    `<b style="color:${cnt>=THRESHOLD?'var(--gold)':'var(--green)'}">${cnt}</b><span style="color:var(--sub)"> / ${THRESHOLD}</span>`;
+  document.getElementById('gift-msg').style.display=cnt>=THRESHOLD?'block':'none';
+}
+
+window.changeYearMonth = () => {
+  curYear=Number(document.getElementById('sel-year').value);
+  curMonth=Number(document.getElementById('sel-month').value);
+  loadCalendar();
+};
+
+// ── 관리자 ────────────────────────────────────────────────────
+window.loadAdminData = async () => {
+  const y=Number(document.getElementById('admin-year').value);
+  const m=Number(document.getElementById('admin-month').value);
+  document.getElementById('adm-loading').style.display='block';
+  document.getElementById('adm-empty').style.display='none';
+  document.getElementById('adm-tbl-wrap').style.display='none';
+
+  const rows=await fbGetAllForMonth(y,m);
+  document.getElementById('adm-loading').style.display='none';
+
+  const achieved=rows.filter(r=>r.achieved).length;
+  const avg=rows.length?Math.round(rows.reduce((a,b)=>a+b.count,0)/rows.length):0;
+  document.getElementById('adm-total').textContent=rows.length;
+  document.getElementById('adm-achieved').textContent=achieved;
+  document.getElementById('adm-avg').textContent=avg;
+
+  if(rows.length===0){ document.getElementById('adm-empty').style.display='block'; return; }
+  document.getElementById('adm-tbl-wrap').style.display='block';
+
+  const medals=['🥇','🥈','🥉'];
+  document.getElementById('adm-tbody').innerHTML=rows.map((r,i)=>{
+    const pct=Math.min(r.count/THRESHOLD*100,100).toFixed(1);
+    const fc=r.achieved?'fill-g':'fill-gold';
+    return `<tr>
+      <td>${i<3?medals[i]:i+1}</td>
+      <td><b>${r.name}</b></td>
+      <td><b style="color:${r.achieved?'var(--green)':'#333'}">${r.count}</b><span style="font-size:10px;color:#aaa"> / ${THRESHOLD}</span></td>
+      <td>${r.achieved?'<span class="badge-green">🎁 달성!</span>':'<span class="badge-gray">진행 중</span>'}</td>
+      <td><div class="mini-bar"><div class="mini-fill ${fc}" style="width:${pct}%"></div></div></td>
+    </tr>`;
+  }).join('');
+};
+
+// ── 공유 모달 ─────────────────────────────────────────────────
+window.openShare = () => {
+  const url=window.location.href;
+  document.getElementById('share-url').textContent=url;
+  document.getElementById('qr-loading').style.display='block';
+  document.getElementById('qr-img').style.display='none';
+  document.getElementById('qr-img').src=
+    `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=1a1a1a&margin=12`;
+  document.getElementById('share-modal').style.display='flex';
+};
+window.qrLoaded = () => {
+  document.getElementById('qr-loading').style.display='none';
+  document.getElementById('qr-img').style.display='block';
+};
+window.qrError = () => {
+  document.getElementById('qr-loading').textContent='QR 생성 실패 (인터넷 연결 확인)';
+};
+window.closeShare = () => { document.getElementById('share-modal').style.display='none'; };
+window.closeShareOutside = (e) => { if(e.target.id==='share-modal') window.closeShare(); };
+
+window.copyLink = () => {
+  const url=document.getElementById('share-url').textContent;
+  const btn=document.getElementById('copy-btn');
+  navigator.clipboard.writeText(url).then(()=>{
+    btn.textContent='✓ 복사됨'; btn.className='copy-btn copy-done';
+    setTimeout(()=>{ btn.textContent='복사'; btn.className='copy-btn copy-default'; },2200);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=url; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+    btn.textContent='✓ 복사됨'; btn.className='copy-btn copy-done';
+    setTimeout(()=>{ btn.textContent='복사'; btn.className='copy-btn copy-default'; },2200);
+  });
+};
+
+// ── 축하 토스트 ───────────────────────────────────────────────
+function showToast() {
+  const t=document.getElementById('toast');
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none',4000);
+}
+
+// ── Service Worker ────────────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{ navigator.serviceWorker.register('./sw.js').catch(()=>{}); });
+}
+
+// ── 초기화 ───────────────────────────────────────────────────
+const savedKey = localStorage.getItem('fb_api_key');
+const savedUrl = localStorage.getItem('fb_db_url');
+if(savedKey && savedUrl && initFirebase(savedKey, savedUrl)){
+  loadChipsAndShowLogin();
+} else {
+  showScreen('screen-setup');
+}
+
+</script>
+</body>
+</html>
